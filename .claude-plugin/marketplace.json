@@ -1,0 +1,14 @@
+{
+  "name": "dejohnson-plugins",
+  "owner": {
+    "name": "DEJohnson"
+  },
+  "plugins": [
+    {
+      "name": "api-quality",
+      "source": "./",
+      "description": "Review an Express API, find coverage gaps, and write the missing tests in one command.",
+      "version": "0.1.0"
+    }
+  ]
+}

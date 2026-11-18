@@ -1,0 +1,11 @@
+{
+  "name": "api-quality",
+  "version": "0.1.0",
+  "description": "Code-quality workflow for Express APIs: parallel review + coverage scan, then targeted tests, with a lint-on-edit hook.",
+  "author": {
+    "name": "DEJohnson"
+  },
+  "repository": "https://github.com/dejohnson7127-sys/claude-multi-agent-workflow",
+  "license": "MIT",
+  "keywords": ["code-quality", "review", "testing", "express", "subagents"]
+}
