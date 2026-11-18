@@ -49,20 +49,39 @@ if (!projectDir) process.exit(0);
 const eslintBin = path.join(projectDir, 'node_modules', '.bin', process.platform === 'win32' ? 'eslint.cmd' : 'eslint');
 if (!fs.existsSync(eslintBin)) process.exit(0); // ESLint not installed — don't block.
 
+const TIMEOUT_MS = 30000;
 const result = spawnSync(eslintBin, ['--format', 'stylish', absFile], {
   cwd: projectDir,
   encoding: 'utf8',
-  timeout: 30000,
+  timeout: TIMEOUT_MS,
 });
 
-if (result.status === 1) {
-  // ESLint exits 1 when there are lint errors.
-  process.stderr.write(
-    `[api-quality] ESLint found errors in ${path.relative(projectDir, absFile)}:\n` +
-      (result.stdout || '') +
-      '\nPlease fix these lint errors.\n'
-  );
+const relFile = path.relative(projectDir, absFile);
+
+function fail(message) {
+  process.stderr.write(`[api-quality] ${message}\n`);
   process.exit(2);
 }
 
-process.exit(0);
+// Spawn failures and timeouts: linting never completed, so don't report "clean".
+if (result.error) {
+  if (result.error.code === 'ETIMEDOUT') {
+    fail(`ESLint timed out after ${TIMEOUT_MS / 1000}s on ${relFile}; the file was NOT lint-checked.`);
+  }
+  fail(`Could not run ESLint on ${relFile}: ${result.error.message}. The file was NOT lint-checked.`);
+}
+if (result.signal) {
+  fail(`ESLint was killed (${result.signal}) while checking ${relFile}; the file was NOT lint-checked.`);
+}
+
+// ESLint exit codes: 0 = clean, 1 = lint errors, 2 = config or internal error.
+if (result.status === 0) process.exit(0);
+
+if (result.status === 1) {
+  fail(`ESLint found errors in ${relFile}:\n${result.stdout || ''}\nPlease fix these lint errors.`);
+}
+
+fail(
+  `ESLint failed to run on ${relFile} (exit code ${result.status}), likely a configuration or runtime error. ` +
+    `The file was NOT lint-checked.\n${result.stderr || result.stdout || ''}`
+);

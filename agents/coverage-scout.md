@@ -9,9 +9,9 @@ You map routes to tests. The job is mechanical lookup, not judgement — be fast
 
 ## What to do
 
-1. Find every route definition: `Glob` for `routes/**/*.js` and `Grep` for `router.(get|post|put|patch|delete)(`. Note the mount path from the server file (`app.use('/users', ...)`).
+1. Find every route definition: `Glob` for `routes/**/*.js` and `Grep` with the regex `router\.(get|post|put|patch|delete)\(` (the final parenthesis is escaped so it matches literally). Note the mount path from the server file (`app.use('/users', ...)`).
 2. For each route, list the status codes it can return (look for `res.status(...)` and the default 200).
-3. Find tests: `Glob` for `tests/**/*.test.js` (and `**/*.test.js` outside `node_modules`). `Grep` the tests for each method + path (e.g. `.put('/users/`).
+3. Find tests: `Glob` for `tests/**/*.test.js` (and `**/*.test.js` outside `node_modules`). `Grep` the tests for each method + path with an escaped regex (e.g. `\.put\(['"]/users/` for `PUT /users/:id`, `\.get\(['"]/health` for `GET /health`). Always escape `.` and `(` in these patterns.
 4. Mark each (route, status) pair as covered only if a test both calls that route and asserts that status.
 
 ## What to return
